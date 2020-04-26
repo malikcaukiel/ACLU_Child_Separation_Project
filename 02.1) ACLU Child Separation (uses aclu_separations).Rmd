@@ -1,0 +1,90 @@
+---
+title: "ACLU Child Separations"
+#output: html_notebook
+---
+
+```{r message=FALSE, warning=FALSE, error=TRUE}
+# loading libraries
+library(readr)
+library(dplyr)
+```
+
+```{r message=FALSE, warning=FALSE, error=TRUE}
+# loading data
+aclu <- read_csv('aclu_separations.csv')
+View(aclu)
+```
+
+```{r error=TRUE}
+# inspecting data
+head(aclu)
+summary(aclu)
+```
+
+```{r error=TRUE}
+# selecting columns
+
+aclu <- aclu %>%
+           select(-addr, -state)
+#head(aclu)
+#View(aclu)
+```
+
+```{r error=TRUE}
+# viewing columns
+print(colnames(aclu))
+#colnames(aclu)
+```
+
+```{r error=TRUE}
+### renaming columns
+
+# program_city -> city
+# program_state -> state
+# n -> number_children
+# lon -> longitude
+# lat -> latitude
+
+aclu <- aclu %>%
+          rename(city=program_city, state=program_state, number_children=n, longitude=lon, latitude=lat)
+print(colnames(aclu))
+```
+
+```{r error=TRUE}
+# adding column
+# Consider southernmost point of the border lies at a latitude of 25.83.
+
+border_latitude <- 25.83
+
+aclu <- aclu %>%
+           mutate(lat_change_border = latitude - border_latitude)
+View(aclu)
+```
+
+```{r error=TRUE}
+# latitude change
+### Filtering the detention centers that are greater than 15 units away from the border
+
+further_away <- aclu %>%
+                  filter(lat_change_border > 15) %>%
+                  arrange(desc(lat_change_border))
+View(further_away)
+```
+
+```{r error=TRUE}
+# number of children
+
+ordered_by_children <- aclu %>%
+                          arrange(desc(number_children))
+head(ordered_by_children)
+```
+
+```{r error=TRUE}
+### state analysis (What's happening in a specific state)
+### and then arranging in descending order
+chosen_state <- "NY"
+chosen_state_separations <- aclu %>%
+                              filter(state == chosen_state) %>%
+                              arrange(desc(number_children))
+chosen_state_separations
+```
